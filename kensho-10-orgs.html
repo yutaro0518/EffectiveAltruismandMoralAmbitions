@@ -3,13 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>検証 ─ 10団体の採点</title>
+<title>Effective Altruism and Moral Ambitions</title>
 <style>
   :root{
     --ink:#12233b;--ink-soft:#3a5170;--paper:#f7f5ef;--paper-line:#e5e0d4;
     --rule:#c9c2b2;--accent:#1f6f6b;--accent-soft:#e4efee;
     --quant:#2f5d8a;--quant-soft:#e2ebf3;--qual:#8a5a2f;--qual-soft:#f0e7db;
     --muted:#6b6f76;--white:#fff;--track:#e8e3d6;--grid:#ded8c8;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --ink:#e7e4da;--ink-soft:#b6bcc7;--paper:#14171c;--paper-line:#2a2e35;
+      --rule:#3a3f47;--accent:#5cb3ac;--accent-soft:#1b2b2a;
+      --quant:#7ea8d8;--quant-soft:#1c2733;--qual:#d99f66;--qual-soft:#2c2419;
+      --muted:#8b909a;--white:#1c1f26;--track:#2a2e35;--grid:#2a2e35;
+    }
+    .qn{color:#5c6068}
+    .dot .tag{background:rgba(20,23,28,.82)}
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;background:var(--paper);color:var(--ink);line-height:1.8;-webkit-font-smoothing:antialiased}
