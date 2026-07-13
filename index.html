@@ -19,7 +19,6 @@
       --muted:#8b909a;--white:#1c1f26;--track:#2a2e35;--grid:#2a2e35;
     }
     .qn{color:#5c6068}
-    .dot .tag{background:rgba(20,23,28,.82)}
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;background:var(--paper);color:var(--ink);line-height:1.8;-webkit-font-smoothing:antialiased}
@@ -88,13 +87,14 @@
   footer{border-top:1.5px solid var(--ink);padding:26px 0 52px;margin-top:24px}
   .fnote{font-family:"Hiragino Sans",sans-serif;font-size:11.5px;color:var(--muted);line-height:1.9;max-width:54em}
   @media(max-width:720px){.plot{height:360px}.intro h1{font-size:20px}.crit-top{flex-direction:column;gap:6px}.pip{width:16px}}
+  @media(prefers-color-scheme:dark){.dot .tag{color:#12233b}}
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap head-inner">
-    <div class="brand">検証<small>KENSHŌ ─ 10 ORGS SCORED</small></div>
+    <div class="brand">Effective Altruism and Moral Ambitions</div>
     <div class="rt sans">試作 v4 ／ 10団体の採点</div>
   </div>
 </header>
