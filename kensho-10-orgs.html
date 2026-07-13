@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>検証 ─ 10団体の採点</title>
+<style>
+  :root{
+    --ink:#12233b;--ink-soft:#3a5170;--paper:#f7f5ef;--paper-line:#e5e0d4;
+    --rule:#c9c2b2;--accent:#1f6f6b;--accent-soft:#e4efee;
+    --quant:#2f5d8a;--quant-soft:#e2ebf3;--qual:#8a5a2f;--qual-soft:#f0e7db;
+    --muted:#6b6f76;--white:#fff;--track:#e8e3d6;--grid:#ded8c8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;background:var(--paper);color:var(--ink);line-height:1.8;-webkit-font-smoothing:antialiased}
+  .sans{font-family:"Hiragino Sans","Yu Gothic",sans-serif}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 26px}
+
+  header{border-bottom:1.5px solid var(--ink);padding:15px 0;position:sticky;top:0;background:var(--paper);z-index:30}
+  .head-inner{display:flex;align-items:baseline;justify-content:space-between}
+  .brand{font-size:23px;letter-spacing:.28em;font-weight:600}
+  .brand small{font-size:10.5px;letter-spacing:.2em;color:var(--muted);display:block;margin-top:2px;font-family:"Hiragino Sans",sans-serif}
+  .rt{font-family:"Hiragino Sans",sans-serif;font-size:12px;color:var(--muted)}
+
+  .intro{padding:40px 0 22px}
+  .intro .eyebrow{font-family:"Hiragino Sans",sans-serif;font-size:12px;letter-spacing:.22em;color:var(--accent);margin-bottom:14px}
+  .intro h1{font-size:26px;font-weight:600;max-width:24em;line-height:1.5}
+  .intro p{margin-top:16px;max-width:44em;font-size:14.5px;color:var(--ink-soft);font-family:"Hiragino Sans",sans-serif}
+
+  /* 俯瞰マトリクス */
+  .mini{padding:8px 0 34px}
+  .plot-shell{position:relative;background:var(--white);border:1px solid var(--rule);padding:24px 24px 16px}
+  .ylabel{position:absolute;left:-4px;top:50%;transform:rotate(-90deg) translateX(50%);transform-origin:left center;font-family:"Hiragino Sans",sans-serif;font-size:11px;letter-spacing:.1em;color:var(--qual);font-weight:700;white-space:nowrap}
+  .plot{position:relative;width:100%;height:440px;margin-left:12px;
+    background:linear-gradient(var(--grid) 1px,transparent 1px) 0 0/100% 20%,linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/20% 100%;
+    border-left:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+  .dot{position:absolute;transform:translate(-50%,50%);cursor:pointer;z-index:3}
+  .dot .pt{width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--white);box-shadow:0 0 0 1.5px var(--accent);transition:transform .14s}
+  .dot.active .pt,.dot:hover .pt{transform:scale(1.4)}
+  .dot .tag{position:absolute;left:16px;top:-3px;white-space:nowrap;font-family:"Hiragino Sans",sans-serif;font-size:11px;color:var(--ink);background:rgba(247,245,239,.82);padding:0 4px}
+  .xlabel{text-align:center;font-family:"Hiragino Sans",sans-serif;font-size:11px;letter-spacing:.1em;color:var(--quant);font-weight:700;margin:10px 0 0 12px}
+  .qn{position:absolute;font-family:"Hiragino Sans",sans-serif;font-size:10.5px;color:#aaa393;letter-spacing:.06em;pointer-events:none}
+  .qn.tr{top:8px;right:10px;text-align:right}.qn.tl{top:8px;left:10px}.qn.br{bottom:6px;right:10px;text-align:right}.qn.bl{bottom:6px;left:10px}
+
+  .tabs{display:flex;gap:0;border-bottom:1.5px solid var(--ink);flex-wrap:wrap;margin-top:8px}
+  .tab{font-family:"Hiragino Sans",sans-serif;font-size:12px;padding:9px 12px;cursor:pointer;color:var(--muted);border:1px solid transparent;border-bottom:none;background:transparent;position:relative;top:1px}
+  .tab.active{background:var(--white);border-color:var(--rule);color:var(--ink);font-weight:600}
+
+  .board{background:var(--white);border:1px solid var(--rule);border-top:none;padding:26px 30px 30px}
+  .org-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--paper-line);padding-bottom:14px}
+  .org-head h2{font-size:20px;font-weight:600}
+  .org-head .kind{font-family:"Hiragino Sans",sans-serif;font-size:12px;color:var(--accent);margin-top:4px}
+  .tot{display:flex;gap:22px}
+  .tot .t{text-align:right;font-family:"Hiragino Sans",sans-serif}
+  .tot .t .lb{font-size:11px;color:var(--muted)}
+  .tot .t .vl{font-size:24px;font-weight:600;line-height:1.1}
+  .tot .q .vl{color:var(--quant)}.tot .l .vl{color:var(--qual)}
+  .tot .t .mx{font-size:11px;color:var(--muted)}
+
+  .axisblock{margin-top:22px}
+  .axis-h{font-family:"Hiragino Sans",sans-serif;font-size:12.5px;letter-spacing:.06em;font-weight:700;margin-bottom:2px}
+  .axis-h.q{color:var(--quant)}.axis-h.l{color:var(--qual)}
+  .axis-conv{font-family:"Hiragino Sans",sans-serif;font-size:12px;color:var(--muted);margin-bottom:12px}
+  .crit{padding:13px 0;border-top:1px solid var(--paper-line)}
+  .crit-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .crit-name{font-family:"Hiragino Sans",sans-serif;font-size:13.5px;font-weight:600}
+  .scorebox{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .pips{display:flex;gap:3px}
+  .pip{width:20px;height:8px;border-radius:1px;background:var(--track)}
+  .pip.on.q{background:var(--quant)}.pip.on.l{background:var(--qual)}
+  .pipnum{font-family:"Hiragino Sans",sans-serif;font-size:12.5px;font-weight:600;width:30px;text-align:right}
+  .rationale{font-family:"Hiragino Sans",sans-serif;font-size:12.5px;color:var(--ink-soft);line-height:1.8;margin-top:8px;max-width:54em}
+  .rationale b{color:var(--ink)}
+
+  .note{margin-top:20px;background:var(--paper);border:1px solid var(--paper-line);padding:14px 16px;font-family:"Hiragino Sans",sans-serif;font-size:12px;color:var(--ink-soft);line-height:1.7}
+  .note b{color:var(--ink)}
+
+  footer{border-top:1.5px solid var(--ink);padding:26px 0 52px;margin-top:24px}
+  .fnote{font-family:"Hiragino Sans",sans-serif;font-size:11.5px;color:var(--muted);line-height:1.9;max-width:54em}
+  @media(max-width:720px){.plot{height:360px}.intro h1{font-size:20px}.crit-top{flex-direction:column;gap:6px}.pip{width:16px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head-inner">
+    <div class="brand">検証<small>KENSHŌ ─ 10 ORGS SCORED</small></div>
+    <div class="rt sans">試作 v4 ／ 10団体の採点</div>
+  </div>
+</header>
+
+<div class="intro">
+  <div class="wrap">
+    <div class="eyebrow sans">同じ物差しで、性格の違う10団体を布置する</div>
+    <h1>類型のばらばらな10団体を、6項目・二軸の同じルーブリックで採点しました。</h1>
+    <p class="sans">直接支援・中間支援・アドボカシー・国際人道支援が混在します。点をクリック、またはタブで各団体の6項目の内訳と、その点数になった根拠を開けます。すべて公開情報にもとづく暫定評価で、精査の深さには団体差があります。</p>
+  </div>
+</div>
+
+<div class="mini">
+  <div class="wrap">
+    <div class="plot-shell">
+      <div class="ylabel sans">測りにくい価値・代替不可能性　→</div>
+      <div class="plot" id="plot">
+        <div class="qn tl sans">価値は高いが<br>定量効果は見えにくい</div>
+        <div class="qn tr sans">数字でも価値でも強い</div>
+        <div class="qn bl sans">評価が難しい／情報不足</div>
+        <div class="qn br sans">効率は高いが代替可</div>
+      </div>
+      <div class="xlabel sans">インパクトの規模・確からしさ　→</div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="board" id="board"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="brand" style="font-size:18px;margin-bottom:12px">検証</div>
+    <p class="fnote sans">
+      各項目0〜4点、軸ごとに3項目合計12点を10点満点へ換算。定量＝［費用対効果/レバレッジ・証拠の強さ・追加寄付の余地］、定性＝［視点の出所・証拠の体系性・代替不可能性］。<br>
+      財務数値のうち、国境なき医師団日本（2024年 総収入140.8億円・ソーシャルミッション112.1億円）、フローレンス（2024年度 総収益40.9億円）等は公表値を参照。他は各団体の類型・公開情報にもとづく推計評価であり、団体の公称値ではありません。精査の深さには団体差があり、本表は方法論の試験運用です。<br>
+      © 2026 Kenshō Prototype — concept draft v4.
+    </p>
+  </div>
+</footer>
+
+<script>
+  const RUBRIC={
+    q:['費用対効果 ／ レバレッジ','証拠の強さ','追加寄付の余地'],
+    l:['視点の出所','証拠の体系性','代替不可能性']
+  };
+  const conv=a=>Math.round(a.reduce((x,y)=>x+y,0)/12*100)/10;
+
+  const orgs=[
+   {id:'msf',name:'国境なき医師団 日本',kind:'国際人道・医療（直接介入）',
+    q:[3,4,3],l:[3,4,4],
+    qr:['紛争地・危機下の医療という、代替の乏しい現場に直接資源を投入。2024年 支出138.6億円のうち<b>112.1億円（約81%）をソーシャル・ミッション</b>に充当。1円あたりの医療到達は高い。',
+        '国際MSFネットワークとして<b>活動報告・独立監査</b>が徹底。医療実績の記録も体系的で証拠は最上位級。',
+        '緊急人道の需要は慢性的に供給を上回り、追加資金の吸収余地は大きい。ただし大規模団体ゆえ限界効果はやや逓減。'],
+    lr:['受益者（患者）と現地スタッフの視点が中心。第三者監査も入り出所は明確。',
+        '医療活動の記録・報告が国際基準で体系化。逸話依存ではない。',
+        '紛争地の中立的医療は他に担い手が極めて少なく、<b>代替不可能性は最高水準</b>。']},
+
+   {id:'katariba',name:'カタリバ',kind:'直接支援（教育・居場所）',
+    q:[3,3,3],l:[3,4,3],
+    qr:['困難を抱える子ども・若者への教育/居場所支援を直接提供。事業と成果の距離が近く、費用対効果は中〜高。',
+        '2024年度まで年次報告・貸借対照表を継続公開。<b>プログラム評価の実践</b>もあり証拠は強め。',
+        '事業拡大局面で追加資金の使途は明確。吸収余地あり。'],
+    lr:['子ども本人の変化を軸に据え、受益者視点が濃い。3点。',
+        '成果測定・アウトカム評価に積極的で、<b>体系性が高い</b>。4点。',
+        '個別伴走型の居場所は代替が乏しいが、類似NPOも一部存在。3点。']},
+
+   {id:'unhcr',name:'国連UNHCR協会',kind:'国際難民支援（募金窓口）',
+    q:[3,3,3],l:[2,3,4],
+    qr:['UNHCRの日本公式支援窓口。集めた寄付が国際機関を通じ<b>難民支援へレバレッジ</b>する。国際機関経由ゆえ現場との距離はやや遠い。',
+        '国連機関としての報告体制は堅牢だが、日本窓口→本部→現場の多段で個別帰属は追いにくい。3点。',
+        '世界の難民需要は巨大で吸収余地は事実上無限だが、限界効果の可視化は難しい。3点。'],
+    lr:['受益者（難民）から組織的距離があり、視点の直接性は中程度。2点。',
+        'UNHCRの国際的な報告基盤に支えられ体系性は高い。3点。',
+        '国連の難民保護は国家横断で<b>代替がきわめて困難</b>。4点。']},
+
+   {id:'florence',name:'フローレンス',kind:'直接支援＋提言（事業型）',
+    q:[3,3,3],l:[3,3,3],
+    qr:['病児保育・障害児保育・こども宅食等を直接運営。2024年度 総収益40.9億円、うち<b>自治体補助46%・寄付17%</b>の事業型。寄付は新規開発・提言に充当され費用対効果は中〜高。',
+        '会計報告を事業モデル別に開示するなど透明性が高い。成果指標も一部整備。3点。',
+        '寄付は「制度の隙間を埋める新規事業」に回るため、追加寄付の限界効果は比較的明確。3点。'],
+    lr:['利用者（保護者・子ども）視点を軸に事業設計。3点。',
+        '事業データの開示は進むが、社会的アウトカムの体系測定は途上。3点。',
+        '病児保育等は民間の先駆で代替が乏しい一方、制度化で公的代替も進む。3点。']},
+
+   {id:'asunoba',name:'あすのば',kind:'給付＋中間支援＋提言（ハイブリッド）',
+    q:[2,3,3],l:[3,3,3],
+    qr:['入学・新生活給付金という<b>直接給付</b>と、政策提言・中間支援を併走。給付部分は費用対効果が見えやすいが、提言部分は測りにくく総合で中程度。事業費<b>約85%</b>を公称。',
+        '6千人規模の当事者調査など<b>実態データを自ら生成</b>。証拠基盤は堅実。3点。',
+        '寄付の多くが給付原資に直結し、追加寄付が給付人数増につながりやすい。3点。'],
+    lr:['子ども・保護者への直接調査で<b>受益者視点</b>を組織的に収集。3点。',
+        '調査を継続実施し体系性あり。ただし規模は中。3点。',
+        '給付＋提言＋中間支援の三位一体は独自だが、各機能には代替もある。3点。']},
+
+   {id:'nippon',name:'日本財団',kind:'大規模助成財団（中間支援）',
+    q:[3,3,2],l:[2,3,4],
+    qr:['競艇事業を原資に<b>広範な分野へ大規模助成</b>。1円が多数の現場団体を動かすレバレッジは大きいが、分野が広く平均費用対効果は薄まる。3点。',
+        '助成実績の開示は厚いが、助成先の成果まで一貫追跡するのは規模ゆえ困難。3点。',
+        '自主財源が潤沢で、個人の追加寄付の限界効果は相対的に低い。2点。'],
+    lr:['助成を通じた間接支援で、受益者からの距離は遠い。2点。',
+        '大規模組織として報告・調査体制は整備。3点。',
+        '国内最大級の助成インフラで、<b>この規模の担い手は他にない</b>。4点。']},
+
+   {id:'afs',name:'AFS日本協会',kind:'国際教育交流',
+    q:[2,3,2],l:[2,3,2],
+    qr:['高校生の国際交流・留学を運営。参加者への便益は明確だが、社会全体への費用対効果としては限定的で中程度。2点。',
+        '長い運営実績とプログラム記録があり証拠は中〜高。3点。',
+        '参加費モデルが中心で、寄付の追加的余地は限定的。2点。'],
+    lr:['参加した生徒の視点が中心。2点。',
+        '長年の運営で記録は体系的。3点。',
+        '国際交流の担い手は他にも多く、代替可能性が高い。2点。']},
+
+   {id:'amnesty',name:'アムネスティ日本',kind:'人権アドボカシー',
+    q:[1,2,3],l:[2,2,3],
+    qr:['人権侵害への調査・キャンペーン・提言。<b>成果を寄付1円あたりで測ることは構造的に困難</b>。最低〜低評価。1点。',
+        '国際調査に基づく発信だが、個別の政策変化への寄与の立証は難しい。2点。',
+        '運動体として追加資金の使途はあるが、成果連動は不透明。3点。'],
+    lr:['人権擁護の主体・専門家視点が中心。2点。',
+        'キャンペーンの効果を体系的に測るのが難しい。2点。',
+        '独立した国際人権NGOの発信は代替が乏しいが、他団体とも重複。3点。']},
+
+   {id:'aids',name:'エイズ予防財団',kind:'啓発・予防（準公的）',
+    q:[2,2,2],l:[2,2,2],
+    qr:['エイズ予防の啓発・研修・情報提供。予防効果は重要だが、寄付との因果や1円あたり効果は見えにくい。中〜低。2点。',
+        '公的連携の実績はあるが、成果の独立した証拠は限定的。2点。',
+        '財政の多くが公的性格で、個人の追加寄付の限界効果は不明瞭。2点。'],
+    lr:['専門家・行政視点が中心で受益者から遠い。2点。',
+        '啓発効果の体系的測定は乏しい。2点。',
+        '予防啓発は行政等でも担われ代替がある。2点。']},
+
+   {id:'acjapan',name:'ACジャパン',kind:'公共広告（会員制）',
+    q:[1,2,1],l:[1,2,2],
+    qr:['公共広告を制作・配信。<b>会員企業の会費で運営される仕組み</b>で、個人寄付を集めて成果に変える団体とは性格が異なる。個人寄付の費用対効果という枠組みが当てはまりにくく最低評価。1点。',
+        '広告の社会的効果の測定は一般に困難。2点。',
+        '会費モデルのため、追加の個人寄付が成果を増やす構造ではない。1点。'],
+    lr:['広告の送り手視点が中心で、明確な受益者を特定しにくい。1点。',
+        'キャンペーン到達の記録はあるが行動変容の証拠は薄い。2点。',
+        '公共広告の担い手として一定の独自性はあるが受益は拡散的。2点。']},
+  ];
+
+  const plot=document.getElementById('plot');
+  const tabs=document.getElementById('tabs');
+  const board=document.getElementById('board');
+  const dots={};
+
+  orgs.forEach((o,i)=>{
+    const qx=conv(o.q), ly=conv(o.l);
+    const d=document.createElement('div');
+    d.className='dot'; d.style.left=(qx/10*100)+'%'; d.style.bottom=(ly/10*100)+'%';
+    d.innerHTML='<div class="pt"></div><div class="tag sans">'+o.name+'</div>';
+    d.onclick=()=>select(i);
+    plot.appendChild(d); dots[i]=d;
+
+    const t=document.createElement('button');
+    t.className='tab'+(i===0?' active':''); t.textContent=o.name;
+    t.onclick=()=>select(i); tabs.appendChild(t);
+    o._tab=t;
+  });
+
+  function axisHTML(o,key){
+    const items=RUBRIC[key],sc=o[key],rats=o[key==='q'?'qr':'lr'];
+    const label=key==='q'?'定量｜規模と確からしさ':'定性｜価値と代替不可能性';
+    let h=`<div class="axisblock"><div class="axis-h ${key}">${label}</div><div class="axis-conv sans">3項目合計 → <b style="color:var(--${key==='q'?'quant':'qual'})">${conv(sc)} / 10</b></div>`;
+    items.forEach((it,idx)=>{
+      let pips=''; for(let p=1;p<=4;p++) pips+=`<span class="pip ${p<=sc[idx]?'on '+key:''}"></span>`;
+      h+=`<div class="crit"><div class="crit-top"><div class="crit-name sans">${it}</div>
+        <div class="scorebox"><div class="pips">${pips}</div><div class="pipnum sans">${sc[idx]} / 4</div></div></div>
+        <div class="rationale sans">${rats[idx]}</div></div>`;
+    });
+    return h+`</div>`;
+  }
+
+  function select(i){
+    const o=orgs[i];
+    Object.values(dots).forEach(d=>d.classList.remove('active'));
+    dots[i].classList.add('active');
+    orgs.forEach(x=>x._tab.classList.remove('active')); o._tab.classList.add('active');
+    let h=`<div class="org-head"><div><h2>${o.name}</h2><div class="kind sans">${o.kind}</div></div>
+      <div class="tot">
+        <div class="t q"><div class="lb sans">定量</div><div class="vl">${conv(o.q)}</div><div class="mx sans">/10</div></div>
+        <div class="t l"><div class="lb sans">定性</div><div class="vl">${conv(o.l)}</div><div class="mx sans">/10</div></div>
+      </div></div>`;
+    h+=axisHTML(o,'q')+axisHTML(o,'l');
+    board.innerHTML=h;
+    board.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  select(0);
+</script>
+
+</body>
+</html>
