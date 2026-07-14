@@ -166,13 +166,22 @@ header{
   position:absolute;
   white-space:nowrap;font-family:var(--sans);font-size:11px;font-weight:500;
   color:var(--ink);
-  background:color-mix(in srgb,var(--surface) 84%,transparent);
+  background:var(--surface);
+  border:1px solid var(--line);
   padding:1px 5px;border-radius:4px;pointer-events:none;
+  transition:opacity .12s ease;
 }
 .dot .tag.r{left:17px;top:50%;transform:translateY(-50%)}
 .dot .tag.l{right:17px;top:50%;transform:translateY(-50%)}
 .dot .tag.t{bottom:15px;left:50%;transform:translateX(-50%)}
 .dot .tag.b{top:15px;left:50%;transform:translateX(-50%)}
+/* labels hidden by the de-clutter pass; revealed when the dot is engaged */
+.dot .tag.hidden{opacity:0}
+.dot:hover,.dot:focus-visible,.dot.active{z-index:7}
+.dot:hover .tag,.dot:focus-visible .tag,.dot.active .tag{
+  opacity:1;background:var(--surface);
+  box-shadow:0 1px 5px rgba(0,0,0,.28);font-weight:600;
+}
 
 .tip{
   position:absolute;z-index:10;display:none;pointer-events:none;
