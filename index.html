@@ -40,7 +40,6 @@
       </div>
       <div class="ranklist-h sans">スコアの高い順（クリックで採点の根拠を表示）</div>
       <div class="ranklist" id="ranklist" role="list"></div>
-      <div class="board" id="board"></div>
     </div>
   </div>
 </section>
@@ -293,7 +292,6 @@
 
   const plot=document.getElementById('plot');
   const ranklist=document.getElementById('ranklist');
-  const board=document.getElementById('board');
   const tip=document.getElementById('tip');
   const dots={};
 
@@ -341,8 +339,8 @@
     d.setAttribute('tabindex','0');
     d.setAttribute('aria-label',`${o.name} 定量${o._qx} 定性${o._ly}`);
     d.innerHTML=`<div class="pt"></div><div class="tag ${o.lp} sans">${o.name}</div>`;
-    d.addEventListener('click',()=>select(i));
-    d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(i);}});
+    d.addEventListener('click',()=>openFromDot(i));
+    d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openFromDot(i);}});
     d.addEventListener('mouseenter',()=>showTip(o,d));
     d.addEventListener('focus',()=>showTip(o,d));
     d.addEventListener('mouseleave',hideTip);
@@ -350,21 +348,25 @@
     plot.appendChild(d); dots[i]=d;
   });
 
-  // Ranked list (replaces the old tabs): sorted by combined score, click to open detail
+  // Ranked accordion (replaces the old tabs): sorted by combined score,
+  // each row collapses/expands its scoring detail in place on click.
   const tot=o=>Math.round((o._qx+o._ly)*10)/10;
   orgs.map((o,i)=>i)
     .sort((a,b)=>(tot(orgs[b])-tot(orgs[a]))||(a-b))
     .forEach((i,rank)=>{
       const o=orgs[i];
-      const row=document.createElement('button');
-      row.className='rank-item';
-      row.setAttribute('role','listitem');
-      row.innerHTML=`<span class="rank-no sans">${String(rank+1).padStart(2,'0')}</span>
-        <span class="rank-main"><span class="rank-name">${o.name}</span><span class="rank-kind sans">${o.kind}</span></span>
-        <span class="rank-sc sans"><span class="q">定量 ${o._qx}</span><span class="l">定性 ${o._ly}</span><span class="tt">計 ${tot(o)}</span></span>`;
-      row.onclick=()=>select(i);
-      ranklist.appendChild(row);
-      o._tab=row;
+      const wrap=document.createElement('div');
+      wrap.className='rank-item-wrap';
+      wrap.innerHTML=`<button class="rank-item" aria-expanded="false">
+          <span class="rank-no sans">${String(rank+1).padStart(2,'0')}</span>
+          <span class="rank-main"><span class="rank-name">${o.name}</span><span class="rank-kind sans">${o.kind}</span></span>
+          <span class="rank-sc sans"><span class="q">定量 ${o._qx}</span><span class="l">定性 ${o._ly}</span><span class="tt">計 ${tot(o)}</span></span>
+          <span class="rank-caret" aria-hidden="true"></span>
+        </button>
+        <div class="rank-detail"><div class="rank-detail-inner">${axisHTML(o,'q')+axisHTML(o,'l')}</div></div>`;
+      wrap.querySelector('.rank-item').addEventListener('click',()=>toggle(i));
+      ranklist.appendChild(wrap);
+      o._tab=wrap;
     });
 
   // Label de-cluttering: a dot whose point is close to any other dot shows no
@@ -404,20 +406,25 @@
     return h+`</div>`;
   }
 
-  function select(i){
-    const o=orgs[i];
-    Object.values(dots).forEach(d=>d.classList.remove('active'));
-    dots[i].classList.add('active');
-    orgs.forEach(x=>x._tab.classList.remove('active'));
-    o._tab.classList.add('active');
-    board.innerHTML=`<div class="org-head"><div><h2>${o.name}</h2><div class="kind sans">${o.kind}</div></div>
-      <div class="tot">
-        <div class="tile q"><div class="lb">定量</div><div class="vl">${o._qx}<small>/10</small></div></div>
-        <div class="tile l"><div class="lb">定性</div><div class="vl">${o._ly}<small>/10</small></div></div>
-      </div></div>`
-      +axisHTML(o,'q')+axisHTML(o,'l');
+  // Accordion open/close. Single-open: opening one closes the rest.
+  function toggle(i){
+    const wrap=orgs[i]._tab, willOpen=!wrap.classList.contains('open');
+    orgs.forEach((o,k)=>{
+      o._tab.classList.remove('open');
+      o._tab.querySelector('.rank-item').setAttribute('aria-expanded','false');
+      dots[k].classList.remove('active');
+    });
+    if(willOpen){
+      wrap.classList.add('open');
+      wrap.querySelector('.rank-item').setAttribute('aria-expanded','true');
+      dots[i].classList.add('active');
+    }
   }
-  select(0);
+  // Clicking a plot dot opens its row and brings it just into view.
+  function openFromDot(i){
+    if(!orgs[i]._tab.classList.contains('open')) toggle(i);
+    orgs[i]._tab.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
   layoutLabels();
   window.addEventListener('load',layoutLabels);
   let _rt; window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(layoutLabels,120);});
