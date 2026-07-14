@@ -197,24 +197,6 @@ header{
 .tip .t-scores .q b{color:var(--quant-text)}
 .tip .t-scores .l b{color:var(--qual-text)}
 
-/* ── in-place detail panel under the plot (opened by a dot click) ── */
-.plotdetail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
-.plotdetail.open{grid-template-rows:1fr;margin-top:22px}
-.plotdetail-inner{overflow:hidden;min-height:0;position:relative}
-.plotdetail.open>.plotdetail-inner{
-  border:1px solid var(--accent);border-radius:14px;
-  background:var(--bg);padding:24px 22px 20px;
-}
-.pd-close{
-  position:absolute;top:12px;right:14px;z-index:2;
-  width:28px;height:28px;line-height:1;border-radius:50%;cursor:pointer;
-  background:var(--surface);border:1px solid var(--line);color:var(--muted);
-  font-size:18px;font-family:var(--sans);transition:color .15s,border-color .15s;
-}
-.pd-close:hover{color:var(--ink);border-color:var(--line-strong)}
-.plotdetail .org-head{padding-right:40px}
-.plotdetail .axisblock:first-of-type{margin-top:22px}
-
 /* ── ranked list (replaces tabs) ─────────────────────────── */
 .ranklist-h{
   margin-top:34px;margin-bottom:10px;
@@ -223,6 +205,9 @@ header{
 }
 .ranklist{display:flex;flex-direction:column;border-top:1px solid var(--line)}
 .rank-item-wrap{border-bottom:1px solid var(--line)}
+/* brief highlight when a plot dot scrolls to its row */
+.rank-item-wrap.flash{animation:rowflash 1.3s ease}
+@keyframes rowflash{0%,100%{background:transparent}22%{background:color-mix(in srgb,var(--accent) 16%,transparent)}}
 .rank-item{
   display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;
   background:transparent;border:none;padding:14px 8px;font-family:var(--sans);
