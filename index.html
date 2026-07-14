@@ -38,7 +38,6 @@
         </div>
         <div class="xlabel sans">インパクトの規模・確からしさ　→</div>
       </div>
-      <div class="plotdetail" id="plotdetail"><div class="plotdetail-inner" id="plotdetailInner"></div></div>
       <div class="ranklist-h sans">スコアの高い順（クリックで採点の根拠を表示）</div>
       <div class="ranklist" id="ranklist" role="list"></div>
     </div>
@@ -293,8 +292,6 @@
 
   const plot=document.getElementById('plot');
   const ranklist=document.getElementById('ranklist');
-  const plotdetail=document.getElementById('plotdetail');
-  const plotdetailInner=document.getElementById('plotdetailInner');
   const tip=document.getElementById('tip');
   const dots={};
 
@@ -423,27 +420,13 @@
       dots[i].classList.add('active');
     }
   }
-  // Clicking a plot dot expands the detail panel in place, right under the plot
-  // (rather than jumping down to the ranked list). Clicking the same dot closes it.
-  function closePlotDetail(){
-    plotdetail.classList.remove('open');
-    plotdetail.dataset.org='';
-    Object.values(dots).forEach(d=>d.classList.remove('active'));
-  }
+  // Clicking a plot dot just moves to that org's row in the ranked list and
+  // briefly highlights it; the detail is opened by clicking the row itself.
   function openFromDot(i){
-    if(plotdetail.classList.contains('open')&&plotdetail.dataset.org===String(i)){ closePlotDetail(); return; }
-    const o=orgs[i];
-    Object.values(dots).forEach(d=>d.classList.remove('active'));
-    dots[i].classList.add('active');
-    plotdetailInner.innerHTML=
-      `<button class="pd-close" aria-label="閉じる">×</button>`
-      +`<div class="org-head"><div><h2>${o.name}</h2><div class="kind sans">${o.kind}</div></div>`
-      +`<div class="tot"><div class="tile q"><div class="lb">定量</div><div class="vl">${o._qx}<small>/10</small></div></div>`
-      +`<div class="tile l"><div class="lb">定性</div><div class="vl">${o._ly}<small>/10</small></div></div></div></div>`
-      +axisHTML(o,'q')+axisHTML(o,'l');
-    plotdetailInner.querySelector('.pd-close').onclick=closePlotDetail;
-    plotdetail.dataset.org=String(i);
-    plotdetail.classList.add('open');
+    const wrap=orgs[i]._tab;
+    wrap.scrollIntoView({behavior:'smooth',block:'center'});
+    wrap.classList.remove('flash'); void wrap.offsetWidth; wrap.classList.add('flash');
+    setTimeout(()=>wrap.classList.remove('flash'),1300);
   }
   layoutLabels();
   window.addEventListener('load',layoutLabels);
