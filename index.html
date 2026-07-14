@@ -19,7 +19,7 @@
   <div class="wrap">
     <div class="eyebrow">Hundreds of Non-profit Organizations, One Rubric</div>
     <h1>効果的利他主義に基づいて、<br>非営利組織を6項目・2軸のルーブリックで採点</h1>
-    <p class="lede sans">直接支援・中間支援・アドボカシー・国際人道支援が混在します。点をクリック、またはタブで各団体の6項目の内訳と、その点数になった根拠を開けます。すべて公開情報にもとづく暫定評価で、精査の深さには団体差があります。</p>
+    <p class="lede sans">直接支援・中間支援・アドボカシー・国際人道支援が混在します。点をクリック、または下のスコア順の一覧から各団体の6項目の内訳と、その点数になった根拠を開けます。すべて公開情報にもとづく暫定評価で、精査の深さには団体差があります。</p>
     <p class="more"><a href="criteria.html">6項目それぞれの採点基準（0〜4点の目安）を見る →</a></p>
   </div>
 </div>
@@ -38,7 +38,8 @@
         </div>
         <div class="xlabel sans">インパクトの規模・確からしさ　→</div>
       </div>
-      <div class="tabs" id="tabs" role="tablist"></div>
+      <div class="ranklist-h sans">スコアの高い順（クリックで採点の根拠を表示）</div>
+      <div class="ranklist" id="ranklist" role="list"></div>
       <div class="board" id="board"></div>
     </div>
   </div>
@@ -291,7 +292,7 @@
   ];
 
   const plot=document.getElementById('plot');
-  const tabs=document.getElementById('tabs');
+  const ranklist=document.getElementById('ranklist');
   const board=document.getElementById('board');
   const tip=document.getElementById('tip');
   const dots={};
@@ -347,32 +348,42 @@
     d.addEventListener('mouseleave',hideTip);
     d.addEventListener('blur',hideTip);
     plot.appendChild(d); dots[i]=d;
-
-    const t=document.createElement('button');
-    t.className='tab'+(i===0?' active':'');
-    t.textContent=o.name;
-    t.setAttribute('role','tab');
-    t.onclick=()=>select(i);
-    tabs.appendChild(t);
-    o._tab=t;
   });
 
-  // Greedy label de-cluttering: keep only non-overlapping labels visible;
-  // the rest stay hidden until their dot is hovered / focused / selected.
-  // Prominent orgs (higher combined score) win the label when clusters collide.
+  // Ranked list (replaces the old tabs): sorted by combined score, click to open detail
+  const tot=o=>Math.round((o._qx+o._ly)*10)/10;
+  orgs.map((o,i)=>i)
+    .sort((a,b)=>(tot(orgs[b])-tot(orgs[a]))||(a-b))
+    .forEach((i,rank)=>{
+      const o=orgs[i];
+      const row=document.createElement('button');
+      row.className='rank-item';
+      row.setAttribute('role','listitem');
+      row.innerHTML=`<span class="rank-no sans">${String(rank+1).padStart(2,'0')}</span>
+        <span class="rank-main"><span class="rank-name">${o.name}</span><span class="rank-kind sans">${o.kind}</span></span>
+        <span class="rank-sc sans"><span class="q">定量 ${o._qx}</span><span class="l">定性 ${o._ly}</span><span class="tt">計 ${tot(o)}</span></span>`;
+      row.onclick=()=>select(i);
+      ranklist.appendChild(row);
+      o._tab=row;
+    });
+
+  // Label de-cluttering: a dot whose point is close to any other dot shows no
+  // persistent label (revealed only on hover / focus / select). Among the
+  // remaining isolated dots, drop any label that would still overlap another.
   function layoutLabels(){
     const pr=plot.getBoundingClientRect();
     if(!pr.width) return;
+    const rel=el=>{const r=el.getBoundingClientRect();return{l:r.left-pr.left,t:r.top-pr.top,r:r.right-pr.left,b:r.bottom-pr.top,cx:r.left+r.width/2-pr.left,cy:r.top+r.height/2-pr.top};};
+    const NEAR=34; // px: dots closer than this to a neighbour are treated as clustered
+    const pts=orgs.map((o,i)=>rel(dots[i].querySelector('.pt')));
+    const isNear=i=>pts.some((p,j)=>j!==i&&Math.hypot(p.cx-pts[i].cx,p.cy-pts[i].cy)<NEAR);
     const order=orgs.map((o,i)=>i).sort((a,b)=>
       (orgs[b]._qx+orgs[b]._ly)-(orgs[a]._qx+orgs[a]._ly));
     orgs.forEach((o,i)=>dots[i].querySelector('.tag').classList.remove('hidden'));
-    const rel=(el,inset=0)=>{const r=el.getBoundingClientRect();return{l:r.left-pr.left+inset,t:r.top-pr.top+inset,r:r.right-pr.left-inset,b:r.bottom-pr.top-inset};};
-    // seed with every dot's core so a label is dropped rather than sprawling over
-    // neighbouring dots; dense clusters therefore go label-free (hover reveals them).
-    const placed=orgs.map((o,i)=>rel(dots[i].querySelector('.pt'),2));
-    const pad=2;
+    const placed=[]; const pad=2;
     order.forEach(i=>{
       const tag=dots[i].querySelector('.tag');
+      if(isNear(i)){ tag.classList.add('hidden'); return; }
       const box=rel(tag);
       const hit=placed.some(q=>!(box.r+pad<q.l||box.l-pad>q.r||box.b+pad<q.t||box.t-pad>q.b));
       if(hit) tag.classList.add('hidden'); else placed.push(box);
