@@ -357,6 +357,28 @@
     o._tab=t;
   });
 
+  // Greedy label de-cluttering: keep only non-overlapping labels visible;
+  // the rest stay hidden until their dot is hovered / focused / selected.
+  // Prominent orgs (higher combined score) win the label when clusters collide.
+  function layoutLabels(){
+    const pr=plot.getBoundingClientRect();
+    if(!pr.width) return;
+    const order=orgs.map((o,i)=>i).sort((a,b)=>
+      (orgs[b]._qx+orgs[b]._ly)-(orgs[a]._qx+orgs[a]._ly));
+    orgs.forEach((o,i)=>dots[i].querySelector('.tag').classList.remove('hidden'));
+    const rel=(el,inset=0)=>{const r=el.getBoundingClientRect();return{l:r.left-pr.left+inset,t:r.top-pr.top+inset,r:r.right-pr.left-inset,b:r.bottom-pr.top-inset};};
+    // seed with every dot's core so a label is dropped rather than sprawling over
+    // neighbouring dots; dense clusters therefore go label-free (hover reveals them).
+    const placed=orgs.map((o,i)=>rel(dots[i].querySelector('.pt'),2));
+    const pad=2;
+    order.forEach(i=>{
+      const tag=dots[i].querySelector('.tag');
+      const box=rel(tag);
+      const hit=placed.some(q=>!(box.r+pad<q.l||box.l-pad>q.r||box.b+pad<q.t||box.t-pad>q.b));
+      if(hit) tag.classList.add('hidden'); else placed.push(box);
+    });
+  }
+
   function axisHTML(o,key){
     const items=RUBRIC[key],sc=o[key],rats=o[key==='q'?'qr':'lr'];
     const label=key==='q'?'定量｜規模と確からしさ':'定性｜価値と代替不可能性';
@@ -385,6 +407,9 @@
       +axisHTML(o,'q')+axisHTML(o,'l');
   }
   select(0);
+  layoutLabels();
+  window.addEventListener('load',layoutLabels);
+  let _rt; window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(layoutLabels,120);});
 </script>
 
 </body>
