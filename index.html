@@ -56,11 +56,8 @@
 </footer>
 
 <script src="data/orgs.js"></script>
+<script src="data/criteria.js"></script>
 <script>
-  const RUBRIC={
-    q:['費用対効果 ／ レバレッジ','証拠の強さ','追加寄付の余地'],
-    l:['視点の出所','証拠の体系性','代替不可能性']
-  };
   const conv=a=>Math.round(a.reduce((x,y)=>x+y,0)/12*100)/10;
 
   // lp: which side the plot label sits on ('r' right / 'l' left)
@@ -169,7 +166,7 @@
   }
 
   function axisHTML(o,key){
-    const items=RUBRIC[key],sc=o[key],rats=o[key==='q'?'qr':'lr'];
+    const items=window.RUBRIC[key].items.map(x=>x.name),sc=o[key],rats=o[key==='q'?'qr':'lr'];
     const label=key==='q'?'定量｜規模と確からしさ':'定性｜価値と代替不可能性';
     let h=`<div class="axisblock"><div class="axis-h ${key}">${label}</div>
       <div class="axis-conv ${key} sans">3項目合計 → <b>${conv(sc)} / 10</b></div>`;
